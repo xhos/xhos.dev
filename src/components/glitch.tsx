@@ -53,7 +53,7 @@ export default function Glitch({
   }, [children, glitchChars, glitchInterval]);
 
   return (
-    <span className={`${jetBrainsMono.className} text-[#9a2cde]`}>
+    <span className={`${jetBrainsMono.className} text-purple-600`}>
       {glitchedText}
     </span>
   );
