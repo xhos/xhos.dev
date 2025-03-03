@@ -31,9 +31,9 @@ export default function CursorSpotlight() {
           left: 0;
           width: 100%;
           height: 100%;
-          background: radial-gradient(400px circle at ${spotlightPosition.current.x}px ${spotlightPosition.current.y}px, 
-            rgba(131, 131, 131, 0.25), 
-            transparent 40%);
+          background: radial-gradient(300px circle at ${spotlightPosition.current.x}px ${spotlightPosition.current.y}px, 
+            hsla(275, 84.00%, 59.80%, 0.5), 
+            transparent 60%);
           filter: blur(25px);
           pointer-events: none;
         "></div>`;

@@ -81,11 +81,9 @@ export default function Home() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            my <Glitch>δνψν</Glitch> years of experience span from web development with <b>react/next</b> to
-            app development with <b>rust/go</b>, and even extend to architecting, deploying, and
-            monitoring complete infrastructures.
+            my <Glitch>δνψν</Glitch> years of experience span dynamic web development with <b>react/next</b>, robust app development in <b>python/go</b>, and end-to-end infrastructure architecture, deployment, and monitoring.
             <br /><br />
-            interested in my resume? just want to say hi? feel free to reach out to me at <Link href="mailto:markkudriavtsev@pm.me" className="underline">markkudriavtsev@pm.me</Link>
+            interested in my resume? just want to say hi? feel free to reach me at <Link href="mailto:markkudriavtsev@pm.me" className="underline">markkudriavtsev@pm.me</Link>
           </CardContent>
           <CardFooter />
         </Card>
@@ -96,9 +94,9 @@ export default function Home() {
         {/* Experience Section */}
         <section className="mb-16">
           <h2 className={`text-3xl font-bold mb-4 ${jetbrainsMono.className}`}>experience</h2>
-          <h3 className="text-xl font-bold mb-2">mid-level full-stack developer</h3>
+          <h3 className="text-xl font-bold mb-2">full stack developer</h3>
           <p className="mb-2">
-            arial
+            arial real estate
             <span className="text-muted-foreground"> sep 2021 – aug 2023 </span>
           </p>
           <div className="flex flex-wrap gap-2 mb-6">
@@ -109,13 +107,14 @@ export default function Home() {
             <Badge variant="outline">docker</Badge>
           </div>
           <p className="mb-6">
-            - built a centralized system with typescript and node, syncing multiple external API&apos;s together <br />
-            - designed and implemented a dashboard, using react and next, to visualize data from the system <br />
-            - set up mongodb to stored synced data <br />
-            - automated email campaigns with python, significantly boosting bookings in usually slow periods <br />
-            - architected and deployed the whole company infrastructure across multiple VPSs and set up CI/CD pipelines
-            with Docker and GitHub Actions, backed by Loki, Grafana, and Prometheus for monitoring.
+            • <strong>Centralized Integration:</strong> Built a TypeScript/Node.js system that synchronizes multiple external APIs in real time. <br />
+            • <strong>Dashboard Development:</strong> Designed and implemented an interactive React/Next.js dashboard to visualize and manage booking data. <br />
+            • <strong>Data Management:</strong> Configured MongoDB to store synchronized booking information for accurate, centralized data access. <br />
+            • <strong>Automated Marketing:</strong> Developed a Python automation that triggered targeted email campaigns, boosting bookings during slow periods. <br />
+            • <strong>Infrastructure & CI/CD:</strong> Architected and deployed company infrastructure across multiple VPSs, establishing Docker-based CI/CD pipelines with GitHub Actions and comprehensive monitoring using Loki, Grafana, and Prometheus.
           </p>
+
+
         </section>
         <section className="mb-16">
           <h2 className={`text-3xl font-bold mb-4 ${jetbrainsMono.className}`}>education</h2>
@@ -125,10 +124,10 @@ export default function Home() {
             <span className="text-muted-foreground"> sep 2023 – current </span>
           </p>
           <p className="mb-2">
-            - advanced skills in C++ programming, web development, database management, and project management <br />
-            - deep understanding of data structures and algorithms <br />
-            - hands-on experience in system analysis and design, multithreaded programming, and automation through scripting <br />
-            - strengthened my communication and teamwork abilities through focused courses in business communication and it project management
+            • advanced skills in C++ programming, web development, database management, and project management <br />
+            • deep understanding of data structures and algorithms <br />
+            • hands-on experience in system analysis and design, multithreaded programming, and automation through scripting <br />
+            • strengthened my communication and teamwork abilities through focused courses in business communication and it project management
           </p>
         </section>
         <section className="mb-16">
