@@ -11,6 +11,19 @@ const nextConfig: NextConfig = {
       'mosaic.scdn.co',
     ],
   },
+  async headers() {
+    return [
+      {
+        source: '/.well-known/discord',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'text/plain',
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;
