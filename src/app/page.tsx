@@ -6,12 +6,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import Image from "next/image";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import Link from "next/link";
-import Glitch from "@/components/glitch";
 import { Badge } from "@/components/ui/badge";
 import { JetBrains_Mono } from "next/font/google";
 import Footer from "@/components/footer"
+import { Github, Linkedin, Mail, MapPin, Instagram } from "lucide-react";
 
 
 const jetbrainsMono = JetBrains_Mono({
@@ -24,43 +29,31 @@ export default function Home() {
     <div className="flex flex-col md:flex-row items-start min-h-screen">
       {/* Left Side - On mobile it's at the top */}
       <div className="w-full md:w-1/2 sticky md:top-0 h-auto md:h-screen flex items-center justify-center p-8 bg-background">
-        <Card className="relative w-full max-w-md card-with-glow-effect">
+        <Card className="relative w-full max-w-2xl card-with-glow-effect">
           <div className="absolute top-5 right-5 flex items-center gap-2">
+            <Link
+              href="https://instagram.com/mark.kdrv/"
+              className="p-1 rounded hover:bg-secondary transition-colors duration-200"
+            >
+              <Instagram size={16} />
+            </Link>
             <Link
               href="https://github.com/xhos"
               className="p-1 rounded hover:bg-secondary transition-colors duration-200"
             >
-              <Image
-                aria-hidden
-                src="/github.svg"
-                alt="Github"
-                width={16}
-                height={16}
-              />
+              <Github size={16} />
             </Link>
             <Link
               href="https://www.linkedin.com/in/markkudriavtsev/"
               className="p-1 rounded hover:bg-secondary transition-colors duration-200"
             >
-              <Image
-                aria-hidden
-                src="/linkedin.svg"
-                alt="LinkedIn"
-                width={16}
-                height={16}
-              />
+              <Linkedin size={16} />
             </Link>
             <Link
               href="mailto:markkudriavtsev@pm.me"
               className="p-1 rounded hover:bg-secondary transition-colors duration-200"
             >
-              <Image
-                aria-hidden
-                src="/mail.svg"
-                alt="Mail"
-                width={16}
-                height={16}
-              />
+              <Mail size={16} />
             </Link>
           </div>
           <CardHeader>
@@ -69,19 +62,18 @@ export default function Home() {
               full stack dev | 2nd year comp-sci student
               <br />
               <div className="inline-flex items-center gap-1">
-                <Image
-                  aria-hidden
-                  src="/map-pin.svg"
-                  alt="Map pin"
-                  width={12}
-                  height={12}
-                />
+                <MapPin size={12} />
                 <span>toronto, canada</span>
               </div>
             </CardDescription>
           </CardHeader>
           <CardContent>
-            my <Glitch>δνψν</Glitch> years of experience span dynamic web development with <b>react/next</b>, robust app development in <b>python/go</b>, and end-to-end infrastructure architecture, deployment, and monitoring.
+            with years of experience in web development using <strong>react/next</strong>, app development in <strong>c++/go</strong>,
+            and comprehensive infrastructure architecture, deployment, and monitoring, i bring both technical
+            expertise and creative problem-solving to every project.
+            <br /><br />
+            when i&apos;m not staring at a screen, you&apos;ll find me chasing fresh powder on the slopes or planning my next adventure.
+            i&apos;ve been fortunate to explore 33 countries and immerse myself in local cultures during my studies in 4 of them.
             <br /><br />
             interested in my resume? just want to say hi? feel free to reach me at <Link href="mailto:markkudriavtsev@pm.me" className="underline">markkudriavtsev@pm.me</Link>
           </CardContent>
@@ -89,11 +81,29 @@ export default function Home() {
         </Card>
       </div>
 
+
       {/* Right Side - Scrollable Content */}
       <div className="w-full md:w-1/2 overflow-y-auto p-8">
         {/* Experience Section */}
-        <section className="mb-16">
+        <section className="mt-16 mb-16">
           <h2 className={`text-3xl font-bold mb-4 ${jetbrainsMono.className}`}>experience</h2>
+          <h3 className="text-xl font-bold mb-2">I&IT technology analyst/developer intern</h3>
+          <p className="mb-2">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>MPBSDP</TooltipTrigger>
+                <TooltipContent>
+                  <p>Ministry of Public and Business<br />
+                    Service Delivery and Procurement<br />
+                    of Ontario</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <span className="text-muted-foreground"> may 2025 - current</span>
+          </p>
+          <div className="flex flex-wrap gap-2 mb-6">
+            <Badge variant="outline">go</Badge>
+          </div>
           <h3 className="text-xl font-bold mb-2">full stack developer</h3>
           <p className="mb-2">
             arial real estate
@@ -107,13 +117,18 @@ export default function Home() {
             <Badge variant="outline">docker</Badge>
           </div>
           <p className="mb-6">
+            • <strong>booking sync & dashboard:</strong> developed a Node.js integration for real-time booking sync and an interactive React/Next.js dashboard<br />
+            • <strong>automated marketing:</strong> implemented a Python solution for targeted email compains with flash deals<br />
+            • <strong>devops & CI/CD:</strong> deployed on VPS with docker, github actions, and monitoring tools (grafana, prometheus, loki) for high reliability
+          </p>
+
+          {/* <p className="mb-6">
             • <strong>Centralized Integration:</strong> Built a TypeScript/Node.js system that synchronizes multiple external APIs in real time. <br />
             • <strong>Dashboard Development:</strong> Designed and implemented an interactive React/Next.js dashboard to visualize and manage booking data. <br />
             • <strong>Data Management:</strong> Configured MongoDB to store synchronized booking information for accurate, centralized data access. <br />
             • <strong>Automated Marketing:</strong> Developed a Python automation that triggered targeted email campaigns, boosting bookings during slow periods. <br />
             • <strong>Infrastructure & CI/CD:</strong> Architected and deployed company infrastructure across multiple VPSs, establishing Docker-based CI/CD pipelines with GitHub Actions and comprehensive monitoring using Loki, Grafana, and Prometheus.
-          </p>
-
+          </p> */}
 
         </section>
         <section className="mb-16">
@@ -124,11 +139,18 @@ export default function Home() {
             <span className="text-muted-foreground"> sep 2023 – current </span>
           </p>
           <p className="mb-2">
+            • <strong>technical proficiency:</strong> skilled in C/C++ programming, web development, database management, and data structures/algorithms<br />
+            • <strong>systems & automation:</strong> experienced in system analysis, multithreaded programming, and scripting for automation.<br />
+            • <strong>communication & teamwork:</strong> strengthened through focused courses in business communication and IT project management.
+          </p>
+
+          {/* <p className="mb-2">
             • advanced skills in C++ programming, web development, database management, and project management <br />
             • deep understanding of data structures and algorithms <br />
             • hands-on experience in system analysis and design, multithreaded programming, and automation through scripting <br />
             • strengthened my communication and teamwork abilities through focused courses in business communication and it project management
-          </p>
+          </p> */}
+
         </section>
         <section className="mb-16">
           <h2 className={`text-3xl font-bold mb-4 ${jetbrainsMono.className}`}>stuff i work with</h2>

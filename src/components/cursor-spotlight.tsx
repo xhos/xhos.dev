@@ -10,7 +10,7 @@ export default function CursorSpotlight() {
   const divRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const easeAmount = 0.01; // lower = more inertia, higher = more responsive
+    const easeAmount = 0.03; // lower = more inertia, higher = more responsive
 
     const animate = () => {
       if (!isVisible) {
@@ -32,7 +32,7 @@ export default function CursorSpotlight() {
           width: 100%;
           height: 100%;
           background: radial-gradient(300px circle at ${spotlightPosition.current.x}px ${spotlightPosition.current.y}px, 
-            hsla(275, 84.00%, 59.80%, 0.5), 
+            hsla(275, 34.60%, 42.50%, 0.50), 
             transparent 60%);
           filter: blur(25px);
           pointer-events: none;
