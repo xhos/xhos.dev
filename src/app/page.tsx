@@ -72,9 +72,6 @@ export default function Home() {
             and comprehensive infrastructure architecture, deployment, and monitoring, i bring both technical
             expertise and creative problem-solving to every project.
             <br /><br />
-            when i&apos;m not staring at a screen, you&apos;ll find me chasing fresh powder on the slopes or planning my next adventure.
-            i&apos;ve been fortunate to explore 33 countries and immerse myself in local cultures during my studies in 4 of them.
-            <br /><br />
             interested in my resume? just want to say hi? feel free to reach me at <Link href="mailto:markkudriavtsev@pm.me" className="underline">markkudriavtsev@pm.me</Link>
           </CardContent>
           <CardFooter />
