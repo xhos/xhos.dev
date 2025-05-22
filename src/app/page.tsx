@@ -68,11 +68,9 @@ export default function Home() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            with years of experience in web development using <strong>react/next</strong>, app development in <strong>c++/go</strong>,
-            and comprehensive infrastructure architecture, deployment, and monitoring, i bring both technical
-            expertise and creative problem-solving to every project.
+            tricking rocks into thinking using Go
             <br /><br />
-            interested in my resume? just want to say hi? feel free to reach me at <Link href="mailto:markkudriavtsev@pm.me" className="underline">markkudriavtsev@pm.me</Link>
+            interested in my resume? feel free to reach me at <Link href="mailto:markkudriavtsev@pm.me" className="underline">markkudriavtsev@pm.me</Link>
           </CardContent>
           <CardFooter />
         </Card>
