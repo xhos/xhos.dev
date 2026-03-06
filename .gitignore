@@ -25,3 +25,8 @@ vite.config.ts.timestamp-*
 # nix dev env
 .direnv/
 /.pre-commit-config.yaml
+# Cloudflare Types
+/worker-configuration.d.ts
+
+.dev.vars*
+!.dev.vars.example
