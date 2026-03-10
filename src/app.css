@@ -1,0 +1,126 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Outfit:wght@300;400;500&display=swap');
+
+:root {
+	--bg: #0d0d0d;
+	--bg-raised: #111111;
+	--border: #1e1e1e;
+	--text: #dedede;
+	--text-muted: #5a5a5a;
+	--accent: #c4a46b;
+	--mono: 'IBM Plex Mono', monospace;
+	--sans: 'Outfit', sans-serif;
+	--max-w: 680px;
+}
+
+*, *::before, *::after {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+html {
+	background: var(--bg);
+	color: var(--text);
+	font-family: var(--sans);
+	font-size: 15px;
+	line-height: 1.7;
+	-webkit-font-smoothing: antialiased;
+}
+
+body {
+	min-height: 100vh;
+	padding: 0 1.25rem;
+}
+
+a {
+	color: inherit;
+	text-decoration: none;
+}
+
+a:hover {
+	color: var(--accent);
+}
+
+code {
+	font-family: var(--mono);
+	font-size: 0.85em;
+	background: var(--bg-raised);
+	border: 1px solid var(--border);
+	padding: 0.1em 0.35em;
+	border-radius: 3px;
+	color: var(--accent);
+}
+
+pre {
+	background: var(--bg-raised);
+	border: 1px solid var(--border);
+	border-radius: 4px;
+	padding: 1rem 1.25rem;
+	overflow-x: auto;
+	font-family: var(--mono);
+	font-size: 0.85rem;
+	line-height: 1.6;
+}
+
+pre code {
+	background: none;
+	border: none;
+	padding: 0;
+	color: var(--text);
+}
+
+hr {
+	border: none;
+	border-top: 1px solid var(--border);
+	margin: 2rem 0;
+}
+
+/* Prose styles for blog posts */
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4 {
+	font-family: var(--mono);
+	font-weight: 500;
+	line-height: 1.3;
+	margin-top: 2.5rem;
+	margin-bottom: 0.75rem;
+	color: var(--text);
+}
+
+.prose h1 { font-size: 1.5rem; }
+.prose h2 { font-size: 1.2rem; color: var(--accent); }
+.prose h3 { font-size: 1rem; }
+
+.prose p {
+	margin-bottom: 1.25rem;
+	color: var(--text);
+}
+
+.prose a {
+	color: var(--accent);
+	text-decoration: underline;
+	text-underline-offset: 3px;
+	text-decoration-color: color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+.prose a:hover {
+	text-decoration-color: var(--accent);
+}
+
+.prose ul,
+.prose ol {
+	padding-left: 1.5rem;
+	margin-bottom: 1.25rem;
+}
+
+.prose li {
+	margin-bottom: 0.35rem;
+}
+
+.prose blockquote {
+	border-left: 2px solid var(--accent);
+	padding-left: 1rem;
+	color: var(--text-muted);
+	margin: 1.5rem 0;
+}
