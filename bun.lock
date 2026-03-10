@@ -1,12 +1,9 @@
 {
   "lockfileVersion": 1,
+  "configVersion": 0,
   "workspaces": {
     "": {
       "name": "xhos.dev",
-      "dependencies": {
-        "wrangler": "^4.71.0",
-        "mdsvex": "^0.12.6",
-      },
       "devDependencies": {
         "@sveltejs/adapter-cloudflare": "^7.2.6",
         "@sveltejs/kit": "^2.50.2",
@@ -15,7 +12,7 @@
         "svelte-check": "^4.4.2",
         "typescript": "^5.9.3",
         "vite": "^7.3.1",
-        "wrangler": "^4.63.0",
+        "wrangler": "^4.71.0",
       },
     },
   },
