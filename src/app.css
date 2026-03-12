@@ -5,13 +5,13 @@
 	--bg-raised: #04111f;
 	--border: #0a1c30;
 	--text: #8ab4d6;
-	--text-dim: #1e3a55;
+	--text-dim: #4a7a9b;
 	--accent: #3eadd5;
 	--accent-glow: rgba(62, 173, 213, 0.12);
 	--display: 'Syne', sans-serif;
 	--mono: 'IBM Plex Mono', monospace;
 	--body: 'DM Sans', sans-serif;
-	--max-w: 680px;
+	--max-w: 740px;
 }
 
 *, *::before, *::after {
@@ -24,7 +24,7 @@ html {
 	background: var(--bg);
 	color: var(--text);
 	font-family: var(--body);
-	font-size: 15px;
+	font-size: 17px;
 	line-height: 1.7;
 	-webkit-font-smoothing: antialiased;
 }

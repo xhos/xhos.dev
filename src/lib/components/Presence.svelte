@@ -5,25 +5,48 @@
 
 	const USER_ID = '383623763360481282';
 
-	type Status = 'online' | 'idle' | 'dnd' | 'offline';
+	type DiscordStatus = 'online' | 'idle' | 'dnd' | 'offline';
+
+	interface DiscordUser {
+		username: string;
+		global_name: string | null;
+		avatar: string | null;
+	}
 
 	interface Spotify {
 		song: string;
 		artist: string;
-		album_art_url: string;
-		track_id: string;
 	}
 
-	let discordStatus = $state<Status>('offline');
-	let spotify = $state<Spotify | null>(null);
-	let ready = $state(false);
+	interface Activity {
+		name: string;
+		details?: string;
+		type: number;
+	}
 
-	const statusLabel: Record<Status, string> = {
-		online: 'online',
-		idle: 'away',
-		dnd: 'busy',
-		offline: 'offline'
-	};
+	let discordStatus = $state<DiscordStatus>('offline');
+	let discordUser = $state<DiscordUser | null>(null);
+	let spotify = $state<Spotify | null>(null);
+	let activity = $state<Activity | null>(null);
+	let ready = $state(false);
+	let activityEl = $state<HTMLElement | null>(null);
+	let isScrolling = $state(false);
+
+	$effect(() => {
+		if (!activityEl) return;
+		const text = activityEl.querySelector('.scroll-text-inner');
+		if (!text) return;
+		const overflows = text.scrollWidth > activityEl.clientWidth;
+		isScrolling = overflows;
+	});
+
+	const avatarUrl = $derived(
+		discordUser?.avatar
+			? `https://cdn.discordapp.com/avatars/${USER_ID}/${discordUser.avatar}.png?size=64`
+			: `https://cdn.discordapp.com/embed/avatars/0.png`
+	);
+
+	const displayName = $derived(discordUser?.global_name ?? discordUser?.username ?? 'xhos');
 
 	onMount(() => {
 		const ws = new WebSocket('wss://api.lanyard.rest/socket');
@@ -38,13 +61,17 @@
 						ws.send(JSON.stringify({ op: 3 }));
 					}
 				}, msg.d.heartbeat_interval);
-
 				ws.send(JSON.stringify({ op: 2, d: { subscribe_to_id: USER_ID } }));
 			}
 
 			if (msg.op === 0) {
-				discordStatus = msg.d.discord_status as Status;
+				discordUser = msg.d.discord_user as DiscordUser;
+				discordStatus = msg.d.discord_status as DiscordStatus;
 				spotify = msg.d.listening_to_spotify ? (msg.d.spotify as Spotify) : null;
+
+				const activities: Activity[] = msg.d.activities ?? [];
+				activity = activities.find((a) => a.type !== 2 && a.type !== 4) ?? null;
+
 				ready = true;
 			}
 		};
@@ -61,29 +88,32 @@
 	});
 </script>
 
-<div class="status-block" class:loading={!ready}>
+<div class="presence" class:loading={!ready}>
 	<p class="q">what am i doing, like <em>right</em> now?</p>
 
-	<div class="section">
-		<div class="status-line">
-			<span class="dot-wrap">
-				<span class="dot {discordStatus}"></span>
-				{#if discordStatus === 'online'}
-					<span class="dot-ping"></span>
-				{/if}
-			</span>
-			<span class="status-text">{ready ? statusLabel[discordStatus] : '...'}</span>
+	<div class="discord-bar">
+		<div class="avatar-wrap">
+			<img class="avatar" src={avatarUrl} alt="" />
+			<span class="dot {discordStatus}"></span>
 		</div>
-		{#if spotify}
-			<div class="spotify">
-				<span class="track">{spotify.song}</span>
-				<span class="by">by {spotify.artist}</span>
-			</div>
-		{/if}
+		<div class="info">
+			<span class="name">{displayName}</span>
+			{#if spotify}
+				<span class="activity-line" class:scrolling={isScrolling} bind:this={activityEl}>
+					<svg class="note" viewBox="0 0 16 16" fill="currentColor"><path d="M6 13c0 1.105-1.12 2-2.5 2S1 14.105 1 13s1.12-2 2.5-2 2.5.895 2.5 2zm9-2c0 1.105-1.12 2-2.5 2s-2.5-.895-2.5-2 1.12-2 2.5-2 2.5.895 2.5 2zM15 1v9h-2V3H8v7H6V1h9z"/></svg>
+					<span class="scroll-text">
+						<span class="scroll-text-inner">{spotify.song} · {spotify.artist}</span>
+						{#if isScrolling}<span class="scroll-text-inner" aria-hidden="true">&nbsp;&nbsp;&nbsp;{spotify.song} · {spotify.artist}</span>{/if}
+					</span>
+				</span>
+			{:else if activity}
+				<span class="activity-line">{activity.name}</span>
+			{/if}
+		</div>
 	</div>
 
 	{#if generalStatus.length > 0}
-		<div class="section">
+		<div class="general">
 			<p class="q">and <em>lately?</em></p>
 			<div class="items">
 				{#each generalStatus as item}
@@ -95,20 +125,117 @@
 </div>
 
 <style>
-	.status-block {
+	.presence {
 		display: flex;
 		flex-direction: column;
-		gap: 1.6rem;
+		gap: 1.4rem;
 		transition: opacity 0.5s;
 	}
 
-	.status-block.loading {
+	.presence.loading {
 		opacity: 0.25;
+	}
+
+	/* ── discord bar ── */
+	.discord-bar {
+		display: flex;
+		align-items: center;
+		gap: 0.65rem;
+		background: var(--bg-raised);
+		border: none;
+		border-radius: 8px;
+		padding: 0.5rem 0.8rem;
+		min-width: 220px;
+		max-width: 280px;
+		width: 280px;
+	}
+
+	.avatar-wrap {
+		position: relative;
+		flex-shrink: 0;
+	}
+
+	.avatar {
+		width: 2.2rem;
+		height: 2.2rem;
+		border-radius: 50%;
+		display: block;
+	}
+
+	.dot {
+		position: absolute;
+		bottom: -1px;
+		right: -1px;
+		width: 0.6rem;
+		height: 0.6rem;
+		border-radius: 50%;
+	}
+
+	.dot.online  { background: #3ba55c; }
+	.dot.idle    { background: #faa61a; }
+	.dot.dnd     { background: #ed4245; }
+	.dot.offline { background: var(--text-dim); }
+
+	/* ── info ── */
+	.info {
+		display: flex;
+		flex-direction: column;
+		gap: 0.05rem;
+		min-width: 0;
+	}
+
+	.name {
+		font-family: var(--body);
+		font-size: 0.95rem;
+		font-weight: 600;
+		color: var(--text);
+		line-height: 1.2;
+	}
+
+	.activity-line {
+		display: flex;
+		align-items: center;
+		font-family: var(--body);
+		font-size: 0.82rem;
+		font-weight: 300;
+		color: var(--text-dim);
+		white-space: nowrap;
+		overflow: hidden;
+		line-height: 1.3;
+	}
+
+	.activity-line .scroll-text {
+		display: inline-block;
+		white-space: nowrap;
+	}
+
+	.activity-line.scrolling .scroll-text {
+		animation: marquee 8s linear infinite;
+	}
+
+	@keyframes marquee {
+		0%   { transform: translateX(0); }
+		100% { transform: translateX(-50%); }
+	}
+
+	.note {
+		width: 0.75rem;
+		height: 0.75rem;
+		color: #3ba55c;
+		flex-shrink: 0;
+		margin-right: 0.25rem;
+	}
+
+	/* ── general ── */
+	.general {
+		display: flex;
+		flex-direction: column;
+		gap: 0.55rem;
 	}
 
 	.q {
 		font-family: var(--body);
-		font-size: 0.92rem;
+		font-size: 0.95rem;
 		font-weight: 300;
 		color: var(--text-dim);
 		line-height: 1.4;
@@ -120,74 +247,6 @@
 		font-weight: 400;
 	}
 
-	.section {
-		display: flex;
-		flex-direction: column;
-		gap: 0.55rem;
-	}
-
-	/* ── live ── */
-	.status-line {
-		display: flex;
-		align-items: center;
-		gap: 0.55rem;
-	}
-
-	.dot-wrap {
-		position: relative;
-		width: 10px;
-		height: 10px;
-		flex-shrink: 0;
-	}
-
-	.dot {
-		position: absolute;
-		inset: 1px;
-		border-radius: 50%;
-	}
-
-	.dot.online  { background: #3ba55c; }
-	.dot.idle    { background: #faa61a; }
-	.dot.dnd     { background: #ed4245; }
-	.dot.offline { background: #1a2d3d; }
-
-	.dot-ping {
-		position: absolute;
-		inset: 0;
-		border-radius: 50%;
-		background: rgba(59, 165, 92, 0.4);
-		animation: ping 2.5s cubic-bezier(0, 0, 0.2, 1) infinite;
-	}
-
-	.status-text {
-		font-family: var(--body);
-		font-size: 0.88rem;
-		font-weight: 400;
-		color: var(--text);
-	}
-
-	.spotify {
-		display: flex;
-		flex-direction: column;
-		gap: 0.12rem;
-		padding-left: 1.55rem;
-	}
-
-	.track {
-		font-family: var(--body);
-		font-size: 0.88rem;
-		font-weight: 500;
-		color: var(--text);
-	}
-
-	.by {
-		font-family: var(--body);
-		font-size: 0.74rem;
-		font-weight: 300;
-		color: var(--text-dim);
-	}
-
-	/* ── general ── */
 	.items {
 		display: flex;
 		flex-direction: column;
@@ -196,14 +255,9 @@
 
 	.item {
 		font-family: var(--body);
-		font-size: 0.88rem;
+		font-size: 0.95rem;
 		font-weight: 400;
 		color: var(--text);
 		opacity: 0.5;
-	}
-
-	@keyframes ping {
-		0%   { transform: scale(1); opacity: 0.6; }
-		75%, 100% { transform: scale(2.2); opacity: 0; }
 	}
 </style>
