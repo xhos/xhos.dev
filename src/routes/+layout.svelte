@@ -1,6 +1,6 @@
 <script lang="ts">
 	import '../app.css';
-	import Nav from '$lib/components/Nav.svelte';
+	import { page } from '$app/stores';
 
 	let { children } = $props();
 </script>
@@ -9,30 +9,15 @@
 	<link rel="icon" href="/favicon.ico" />
 </svelte:head>
 
-<Nav />
-
-<main>
+<div class="site" class:inner={$page.url.pathname !== '/'}>
 	{@render children()}
-</main>
-
-<footer>
-	<span>xhos</span>
-</footer>
+</div>
 
 <style>
-	main {
-		max-width: var(--max-w);
-		margin: 0 auto;
-		padding-bottom: 6rem;
-	}
-
-	footer {
-		max-width: var(--max-w);
-		margin: 0 auto;
-		padding: 2rem 0 3rem;
-		border-top: 1px solid var(--border);
-		font-family: var(--mono);
-		font-size: 0.75rem;
-		color: var(--text-muted);
+	.inner {
+		background:
+			radial-gradient(ellipse 80% 40% at 50% 0%, #051830 0%, transparent 100%),
+			linear-gradient(180deg, #020c18 0%, #010810 40%, #000406 100%);
+		min-height: 100vh;
 	}
 </style>

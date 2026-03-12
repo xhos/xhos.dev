@@ -21,37 +21,47 @@
 
 <style>
 	nav {
-		max-width: var(--max-w);
-		margin: 0 auto;
-		padding: 2.5rem 0 3rem;
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		z-index: 100;
+		height: var(--nav-h);
+		padding: 0 2.5rem;
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
+		background: rgba(1, 10, 20, 0.65);
+		backdrop-filter: blur(20px);
+		-webkit-backdrop-filter: blur(20px);
+		border-bottom: 1px solid rgba(13, 36, 56, 0.7);
 	}
 
 	.home {
 		font-family: var(--mono);
-		font-size: 0.9rem;
+		font-size: 0.82rem;
 		color: var(--accent);
-		letter-spacing: 0.02em;
+		letter-spacing: 0.04em;
+		opacity: 0.85;
+		transition: opacity 0.2s;
 	}
 
 	.home:hover {
+		opacity: 1;
 		color: var(--accent);
-		opacity: 0.75;
 	}
 
 	.links {
 		display: flex;
-		gap: 1.75rem;
+		gap: 2rem;
 	}
 
 	.links a {
 		font-family: var(--mono);
-		font-size: 0.8rem;
+		font-size: 0.76rem;
 		color: var(--text-muted);
-		letter-spacing: 0.02em;
-		transition: color 0.15s;
+		letter-spacing: 0.04em;
+		transition: color 0.2s;
 	}
 
 	.links a:hover,

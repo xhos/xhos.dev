@@ -10,31 +10,27 @@
 	{/if}
 </svelte:head>
 
-<article>
-	<header>
-		<p class="post-date">
-			{new Date(data.meta.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-		</p>
-		<h1>{data.meta.title}</h1>
-		{#if data.meta.description}
-			<p class="post-desc">{data.meta.description}</p>
-		{/if}
-	</header>
+<div class="page-shell">
+	<div class="back"><a href="/blog">← blog</a></div>
 
-	<div class="prose">
-		<Component />
-	</div>
-</article>
+	<article>
+		<header>
+			<time class="post-date">
+				{new Date(data.meta.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+			</time>
+			<h1>{data.meta.title}</h1>
+			{#if data.meta.description}
+				<p class="post-desc">{data.meta.description}</p>
+			{/if}
+		</header>
 
-<div class="back">
-	<a href="/blog">← all posts</a>
+		<div class="prose">
+			<Component />
+		</div>
+	</article>
 </div>
 
 <style>
-	article {
-		max-width: 100%;
-	}
-
 	header {
 		margin-bottom: 3rem;
 		padding-bottom: 2rem;
@@ -43,39 +39,27 @@
 
 	.post-date {
 		font-family: var(--mono);
-		font-size: 0.75rem;
-		color: var(--text-muted);
+		font-size: 0.68rem;
+		color: var(--text-dim);
+		letter-spacing: 0.04em;
+		display: block;
 		margin-bottom: 0.75rem;
 	}
 
 	h1 {
-		font-family: var(--mono);
-		font-size: 1.3rem;
-		font-weight: 500;
+		font-family: var(--display);
+		font-size: 1.5rem;
+		font-weight: 700;
 		color: var(--text);
-		line-height: 1.35;
+		line-height: 1.3;
 		margin-bottom: 0.75rem;
 	}
 
 	.post-desc {
-		color: var(--text-muted);
-		font-size: 0.95rem;
-		line-height: 1.65;
-	}
-
-	.back {
-		margin-top: 4rem;
-		padding-top: 2rem;
-		border-top: 1px solid var(--border);
-	}
-
-	.back a {
-		font-family: var(--mono);
-		font-size: 0.8rem;
-		color: var(--text-muted);
-	}
-
-	.back a:hover {
-		color: var(--accent);
+		font-family: var(--body);
+		font-weight: 300;
+		color: var(--text-dim);
+		font-size: 0.92rem;
+		line-height: 1.6;
 	}
 </style>
