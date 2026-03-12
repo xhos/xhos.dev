@@ -29,6 +29,16 @@
 	let spotify = $state<Spotify | null>(null);
 	let activity = $state<Activity | null>(null);
 	let ready = $state(false);
+	let activityEl = $state<HTMLElement | null>(null);
+	let isScrolling = $state(false);
+
+	$effect(() => {
+		if (!activityEl) return;
+		const text = activityEl.querySelector('.scroll-text-inner');
+		if (!text) return;
+		const overflows = text.scrollWidth > activityEl.clientWidth;
+		isScrolling = overflows;
+	});
 
 	const avatarUrl = $derived(
 		discordUser?.avatar
@@ -89,9 +99,12 @@
 		<div class="info">
 			<span class="name">{displayName}</span>
 			{#if spotify}
-				<span class="activity-line">
+				<span class="activity-line" class:scrolling={isScrolling} bind:this={activityEl}>
 					<svg class="note" viewBox="0 0 16 16" fill="currentColor"><path d="M6 13c0 1.105-1.12 2-2.5 2S1 14.105 1 13s1.12-2 2.5-2 2.5.895 2.5 2zm9-2c0 1.105-1.12 2-2.5 2s-2.5-.895-2.5-2 1.12-2 2.5-2 2.5.895 2.5 2zM15 1v9h-2V3H8v7H6V1h9z"/></svg>
-					{spotify.song} · {spotify.artist}
+					<span class="scroll-text">
+						<span class="scroll-text-inner">{spotify.song} · {spotify.artist}</span>
+						{#if isScrolling}<span class="scroll-text-inner" aria-hidden="true">&nbsp;&nbsp;&nbsp;{spotify.song} · {spotify.artist}</span>{/if}
+					</span>
 				</span>
 			{:else if activity}
 				<span class="activity-line">{activity.name}</span>
@@ -132,6 +145,9 @@
 		border: none;
 		border-radius: 8px;
 		padding: 0.5rem 0.8rem;
+		min-width: 220px;
+		max-width: 280px;
+		width: 280px;
 	}
 
 	.avatar-wrap {
@@ -185,8 +201,21 @@
 		color: var(--text-dim);
 		white-space: nowrap;
 		overflow: hidden;
-		text-overflow: ellipsis;
 		line-height: 1.3;
+	}
+
+	.activity-line .scroll-text {
+		display: inline-block;
+		white-space: nowrap;
+	}
+
+	.activity-line.scrolling .scroll-text {
+		animation: marquee 8s linear infinite;
+	}
+
+	@keyframes marquee {
+		0%   { transform: translateX(0); }
+		100% { transform: translateX(-50%); }
 	}
 
 	.note {
