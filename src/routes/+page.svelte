@@ -377,7 +377,7 @@
 
   .zone-label {
     font-family: var(--mono);
-    font-size: 0.58rem;
+    font-size: 0.72rem;
     color: var(--text-dim);
     text-transform: uppercase;
     letter-spacing: 0.16em;
@@ -397,7 +397,7 @@
     gap: 0.3rem;
     padding: 0.9rem 1.1rem;
     border-radius: 10px;
-    border: 1px solid rgba(10, 28, 48, 0.7);
+    border: 1px solid transparent;
     background: rgba(3, 10, 20, 0.45);
     transition:
       border-color 0.3s,
@@ -405,7 +405,7 @@
   }
 
   .post-card:hover {
-    border-color: rgba(62, 173, 213, 0.18);
+    border-color: rgba(62, 173, 213, 0.15);
     background: rgba(5, 15, 28, 0.6);
   }
 
@@ -418,7 +418,7 @@
 
   .post-title {
     font-family: var(--body);
-    font-size: 0.88rem;
+    font-size: 1rem;
     font-weight: 500;
     color: var(--text);
     transition: color 0.2s;
@@ -430,13 +430,13 @@
 
   .post-date {
     font-family: var(--mono);
-    font-size: 0.6rem;
+    font-size: 0.75rem;
     color: var(--text-dim);
     flex-shrink: 0;
   }
 
   .post-desc {
-    font-size: 0.78rem;
+    font-size: 0.9rem;
     font-weight: 300;
     color: var(--text-dim);
     line-height: 1.5;
@@ -444,7 +444,7 @@
 
   .see-all {
     font-family: var(--mono);
-    font-size: 0.62rem;
+    font-size: 0.75rem;
     color: var(--text-dim);
     letter-spacing: 0.06em;
     transition: color 0.2s;
@@ -468,7 +468,7 @@
     gap: 0.35rem;
     padding: 0.9rem 1.1rem;
     border-radius: 10px;
-    border: 1px solid rgba(10, 28, 48, 0.7);
+    border: 1px solid transparent;
     background: rgba(3, 10, 20, 0.45);
     transition:
       border-color 0.3s,
@@ -476,7 +476,7 @@
   }
 
   .project-card:hover {
-    border-color: rgba(62, 173, 213, 0.18);
+    border-color: rgba(62, 173, 213, 0.15);
     background: rgba(5, 15, 28, 0.6);
   }
 
@@ -488,7 +488,7 @@
 
   .project-name {
     font-family: var(--mono);
-    font-size: 0.88rem;
+    font-size: 1rem;
     color: var(--text);
     opacity: 0.85;
     transition:
@@ -503,13 +503,13 @@
 
   .lang {
     font-family: var(--mono);
-    font-size: 0.6rem;
+    font-size: 0.75rem;
     color: var(--text-dim);
     letter-spacing: 0.04em;
   }
 
   .project-desc {
-    font-size: 0.85rem;
+    font-size: 0.95rem;
     font-weight: 300;
     color: var(--text-dim);
     line-height: 1.55;
@@ -531,7 +531,7 @@
 
   .uses-label {
     font-family: var(--mono);
-    font-size: 0.62rem;
+    font-size: 0.75rem;
     color: var(--text-dim);
     text-transform: uppercase;
     letter-spacing: 0.12em;
@@ -549,7 +549,7 @@
     display: flex;
     align-items: baseline;
     gap: 0.75rem;
-    font-size: 0.88rem;
+    font-size: 1rem;
   }
 
   .item-name {
@@ -563,7 +563,7 @@
   .item-detail {
     font-weight: 300;
     color: var(--text-dim);
-    font-size: 0.84rem;
+    font-size: 0.95rem;
   }
 
   /* ─── footer ─── */
@@ -575,7 +575,7 @@
 
   .site-footer p {
     font-family: var(--mono);
-    font-size: 0.62rem;
+    font-size: 0.75rem;
     color: var(--text-dim);
     opacity: 0.4;
     line-height: 1.6;
