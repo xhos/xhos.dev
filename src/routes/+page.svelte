@@ -423,7 +423,7 @@
     .band { padding: 3rem 1.5rem 1.5rem; }
     .band.overlap { margin-top: 0; }
     .band-content { max-width: none; margin-left: 0 !important; margin-right: 0 !important; }
-    .ghost { position: relative; top: auto; left: auto; right: auto; margin-bottom: 0.5rem; }
+    .ghost { position: relative; top: auto; left: auto !important; right: auto !important; margin-bottom: 0.5rem; white-space: normal; font-size: clamp(2rem, 12vw, 3rem); }
     .uses-row { flex-direction: column; gap: 0.1rem; }
     .uses-row dt { min-width: 0; }
   }
