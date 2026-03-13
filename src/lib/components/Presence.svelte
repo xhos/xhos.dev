@@ -91,26 +91,32 @@
 <div class="presence" class:loading={!ready}>
 	<p class="q">what am i doing, like <em>right</em> now?</p>
 
-	<div class="discord-bar">
-		<div class="avatar-wrap">
-			<img class="avatar" src={avatarUrl} alt="" />
-			<span class="dot {discordStatus}"></span>
+	{#if discordStatus === 'offline'}
+		<div class="discord-bar offline-bar">
+			<span class="offline-text">touching grass offline :)</span>
 		</div>
-		<div class="info">
-			<span class="name">{displayName}</span>
-			{#if spotify}
-				<span class="activity-line" class:scrolling={isScrolling} bind:this={activityEl}>
-					<svg class="note" viewBox="0 0 16 16" fill="currentColor"><path d="M6 13c0 1.105-1.12 2-2.5 2S1 14.105 1 13s1.12-2 2.5-2 2.5.895 2.5 2zm9-2c0 1.105-1.12 2-2.5 2s-2.5-.895-2.5-2 1.12-2 2.5-2 2.5.895 2.5 2zM15 1v9h-2V3H8v7H6V1h9z"/></svg>
-					<span class="scroll-text">
-						<span class="scroll-text-inner">{spotify.song} · {spotify.artist}</span>
-						{#if isScrolling}<span class="scroll-text-inner" aria-hidden="true">&nbsp;&nbsp;&nbsp;{spotify.song} · {spotify.artist}</span>{/if}
+	{:else}
+		<div class="discord-bar">
+			<div class="avatar-wrap">
+				<img class="avatar" src={avatarUrl} alt="" />
+				<span class="dot {discordStatus}"></span>
+			</div>
+			<div class="info">
+				<span class="name">{displayName}</span>
+				{#if spotify}
+					<span class="activity-line" class:scrolling={isScrolling} bind:this={activityEl}>
+						<svg class="note" viewBox="0 0 16 16" fill="currentColor"><path d="M6 13c0 1.105-1.12 2-2.5 2S1 14.105 1 13s1.12-2 2.5-2 2.5.895 2.5 2zm9-2c0 1.105-1.12 2-2.5 2s-2.5-.895-2.5-2 1.12-2 2.5-2 2.5.895 2.5 2zM15 1v9h-2V3H8v7H6V1h9z"/></svg>
+						<span class="scroll-text">
+							<span class="scroll-text-inner">{spotify.song} · {spotify.artist}</span>
+							{#if isScrolling}<span class="scroll-text-inner" aria-hidden="true">&nbsp;&nbsp;&nbsp;{spotify.song} · {spotify.artist}</span>{/if}
+						</span>
 					</span>
-				</span>
-			{:else if activity}
-				<span class="activity-line">{activity.name}</span>
-			{/if}
+				{:else if activity}
+					<span class="activity-line">{activity.name}</span>
+				{/if}
+			</div>
 		</div>
-	</div>
+	{/if}
 
 	{#if generalStatus.length > 0}
 		<div class="general">
@@ -176,6 +182,20 @@
 	.dot.dnd     { background: #ed4245; }
 	.dot.offline { background: var(--text-dim); }
 
+	.offline-bar {
+		background: none;
+		padding: 0;
+		border-radius: 0;
+	}
+
+	.offline-text {
+		font-family: var(--body);
+		font-size: 0.95rem;
+		font-weight: 300;
+		color: var(--text-dim);
+		font-style: italic;
+	}
+
 	/* ── info ── */
 	.info {
 		display: flex;
@@ -224,6 +244,11 @@
 		color: #3ba55c;
 		flex-shrink: 0;
 		margin-right: 0.25rem;
+		position: relative;
+		z-index: 1;
+		background: var(--bg-raised);
+		padding-right: 0.3rem;
+		box-shadow: 4px 0 6px 4px var(--bg-raised);
 	}
 
 	/* ── general ── */
