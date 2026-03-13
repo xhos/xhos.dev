@@ -34,10 +34,10 @@
 
   $effect(() => {
     if (!activityEl) return;
-    const text = activityEl.querySelector(".scroll-text-inner");
-    if (!text) return;
-    const overflows = text.scrollWidth > activityEl.clientWidth;
-    isScrolling = overflows;
+    const track = activityEl.querySelector(".scroll-track");
+    const content = activityEl.querySelector(".scroll-text-inner");
+    if (!track || !content) return;
+    isScrolling = (content as HTMLElement).scrollWidth > (track as HTMLElement).clientWidth;
   });
 
   const avatarUrl = $derived(
@@ -125,15 +125,11 @@
                 d="M6 13c0 1.105-1.12 2-2.5 2S1 14.105 1 13s1.12-2 2.5-2 2.5.895 2.5 2zm9-2c0 1.105-1.12 2-2.5 2s-2.5-.895-2.5-2 1.12-2 2.5-2 2.5.895 2.5 2zM15 1v9h-2V3H8v7H6V1h9z"
               /></svg
             >
-            <span class="scroll-text">
-              <span class="scroll-text-inner"
-                >{spotify.song} · {spotify.artist}</span
-              >
-              {#if isScrolling}<span
-                  class="scroll-text-inner"
-                  aria-hidden="true"
-                  >&nbsp;&nbsp;&nbsp;{spotify.song} · {spotify.artist}</span
-                >{/if}
+            <span class="scroll-track">
+              <span class="scroll-content" class:animate={isScrolling}>
+                <span class="scroll-text-inner">{spotify.song} · {spotify.artist}</span>
+                {#if isScrolling}<span class="scroll-text-inner" aria-hidden="true">{spotify.song} · {spotify.artist}</span>{/if}
+              </span>
             </span>
           </span>
         {:else if activity}
@@ -257,12 +253,28 @@
     line-height: 1.3;
   }
 
-  .activity-line .scroll-text {
-    display: inline-block;
+  .scroll-track {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
     white-space: nowrap;
   }
 
-  .activity-line.scrolling .scroll-text {
+  .activity-line.scrolling .scroll-track {
+    -webkit-mask-image: linear-gradient(to right, black 75%, transparent 100%);
+    mask-image: linear-gradient(to right, black 75%, transparent 100%);
+  }
+
+  .scroll-content {
+    display: inline-flex;
+    white-space: nowrap;
+  }
+
+  .scroll-text-inner {
+    padding-right: 2rem;
+  }
+
+  .scroll-content.animate {
     animation: marquee 8s linear infinite;
   }
 
@@ -281,11 +293,6 @@
     color: #3ba55c;
     flex-shrink: 0;
     margin-right: 0.25rem;
-    position: relative;
-    z-index: 1;
-    background: var(--bg-raised);
-    padding-right: 0.3rem;
-    box-shadow: 4px 0 6px 4px var(--bg-raised);
   }
 
   /* ── general ── */

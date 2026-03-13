@@ -66,7 +66,8 @@
 		style="height: {thumbHeight}px; transform: translateY({thumbTop}px)"
 		onmousedown={onDragStart}
 		role="scrollbar"
-		aria-valuenow={Math.round(thumbTop)}
+		aria-controls="site-content"
+		aria-valuenow={Math.round((thumbTop / (window?.innerHeight - thumbHeight)) * 100)}
 		aria-valuemin={0}
 		aria-valuemax={100}
 		tabindex="0"

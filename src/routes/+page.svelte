@@ -2,48 +2,17 @@
   import Presence from "$lib/components/Presence.svelte";
   import { onMount } from "svelte";
   import { slide } from "svelte/transition";
-  import { SiGithub, SiDiscord, SiInstagram } from "@icons-pack/svelte-simple-icons";
+  import { SiGithub, SiDiscord, SiInstagram, SiTelegram } from "@icons-pack/svelte-simple-icons";
+  import { Mail } from "lucide-svelte";
+  import { projects, langColor } from "$lib/projects";
+  import Screenshots from "$lib/components/Screenshots.svelte";
 
   let { data } = $props();
-
-  const projects = [
-    {
-      name: "nix",
-      description: "nixos configs for ~5 hosts + homelab",
-      repo: "https://github.com/xhos/nix",
-      lang: "nix",
-      details: "declarative configs for my desktop, laptop, server and a few other hosts. managed with flakes, home-manager for user env, and a bunch of custom modules.",
-      screenshots: [] as string[],
-    },
-    {
-      name: "null",
-      description: "way too complex of a finance tracker im making for my personal use",
-      repo: "https://github.com/xhos/null-core",
-      lang: "go",
-      details: "a personal finance tracker with transaction ingestion, category rules, and a tui. probably overkill but that's the point.",
-      screenshots: [] as string[],
-    },
-    {
-      name: "yawn",
-      description: "a minimalistic yet good-looking TUI greeter",
-      repo: "https://github.com/xhos/yawn",
-      lang: "go",
-      details: "a login greeter for wayland/tty that stays out of your way. just a username, password, and session picker.",
-      screenshots: [] as string[],
-    },
-  ];
 
   let expandedProject = $state<string | null>(null);
   function toggleProject(name: string) {
     expandedProject = expandedProject === name ? null : name;
   }
-
-  const langColor: Record<string, string> = {
-    nix: "#7ebae4",
-    go: "#00add8",
-    typescript: "#3178c6",
-    python: "#3572a5",
-  };
 
   const uses = [
     {
@@ -117,6 +86,12 @@
           <a href="https://www.instagram.com/mark.kdrv/" target="_blank" rel="noopener" aria-label="Instagram">
             <SiInstagram size={20} />
           </a>
+          <a href="https://t.me/xhoss" target="_blank" rel="noopener" aria-label="Telegram">
+            <SiTelegram size={20} />
+          </a>
+          <a href="mailto:mark@kdrv.me" aria-label="Email">
+            <Mail size={20} />
+          </a>
         </div>
       </div>
       <div class="hero-right">
@@ -178,11 +153,7 @@
               {#if open}
                 <div class="card-expanded" transition:slide={{ duration: 220 }}>
                   {#if project.screenshots.length > 0}
-                    <div class="screenshots">
-                      {#each project.screenshots as src}
-                        <img {src} alt="{project.name} screenshot" />
-                      {/each}
-                    </div>
+                    <Screenshots screenshots={project.screenshots} name={project.name} />
                   {/if}
                   <p class="card-details">{project.details}</p>
                   <a href={project.repo} target="_blank" rel="noopener" class="repo-link" onclick={(e) => e.stopPropagation()}>
@@ -194,6 +165,7 @@
           </li>
         {/each}
       </ul>
+      <a href="/projects" class="link-arrow">all projects →</a>
     </div>
   </section>
 
@@ -227,9 +199,12 @@
     --pad: clamp(1.5rem, 5vw, 4rem);
     background:
       radial-gradient(ellipse 120% 28% at 50% 0%, #0b2d5a 0%, transparent 100%),
-      radial-gradient(ellipse 50% 18% at 12% 42%, #051830 0%, transparent 100%),
-      radial-gradient(ellipse 35% 14% at 90% 38%, #040f20 0%, transparent 100%),
+      radial-gradient(ellipse 50% 18% at 12% 32%, #051830 0%, transparent 100%),
+      radial-gradient(ellipse 35% 14% at 90% 28%, #040f20 0%, transparent 100%),
       linear-gradient(180deg, #030e1d 0%, #020a16 25%, #010810 50%, #000406 100%);
+    background-size: 100% 250vh;
+    background-repeat: no-repeat;
+    background-color: #000406;
   }
 
   /* ━━━ scroll reveal ━━━ */
@@ -318,6 +293,7 @@
     z-index: 1;
   }
   .band.overlap { margin-top: -4rem; z-index: 0; }
+  .band.left.overlap { z-index: 1; }
 
   .band-content {
     position: relative; z-index: 1;
@@ -403,19 +379,6 @@
     overflow: hidden;
   }
 
-  .screenshots {
-    display: flex;
-    gap: 0.5rem;
-    overflow-x: auto;
-    border-radius: 6px;
-  }
-  .screenshots img {
-    height: 120px;
-    width: auto;
-    border-radius: 6px;
-    object-fit: cover;
-    flex-shrink: 0;
-  }
 
   .card-details {
     font-size: 0.88rem;

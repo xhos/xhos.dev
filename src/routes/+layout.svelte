@@ -1,7 +1,9 @@
 <script lang="ts">
 	import '../app.css';
 	import { page } from '$app/stores';
+	import { browser } from '$app/environment';
 	import Scrollbar from '$lib/components/Scrollbar.svelte';
+	import Lightbox from '$lib/components/Lightbox.svelte';
 
 	let { children } = $props();
 </script>
@@ -10,10 +12,11 @@
 	<link rel="icon" href="/favicon.ico" />
 </svelte:head>
 
-<div class="site" class:inner={$page.url.pathname !== '/'}>
+<div id="site-content" class="site" class:inner={$page.url.pathname !== '/'}>
 	{@render children()}
 </div>
-<Scrollbar />
+{#if browser}<Scrollbar />{/if}
+<Lightbox />
 
 <style>
 	.inner {

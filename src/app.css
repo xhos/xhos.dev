@@ -42,6 +42,9 @@ a:hover {
 	color: var(--accent);
 }
 
+/* ── suppress svg title tooltips ── */
+svg title { display: none; }
+
 /* ── hide native scrollbar ── */
 ::-webkit-scrollbar { display: none; }
 * { scrollbar-width: none; }
