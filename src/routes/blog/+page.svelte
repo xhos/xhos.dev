@@ -34,22 +34,24 @@
 		list-style: none;
 		display: flex;
 		flex-direction: column;
-		gap: 0.4rem;
+		gap: 0.25rem;
 	}
 
 	.post-link {
 		display: flex;
 		flex-direction: column;
-		gap: 0.25rem;
-		padding: 0.85rem 1rem;
-		border-radius: 8px;
+		gap: 0.2rem;
+		padding: 0.75rem 1rem;
+		border-radius: 10px;
+		background: rgba(3, 10, 20, 0.45);
 		border: 1px solid transparent;
-		transition: border-color 0.3s, background 0.3s;
+		transition: background 0.3s, border-color 0.3s, transform 0.2s;
 	}
 
 	.post-link:hover {
-		border-color: var(--border);
-		background: var(--bg-raised);
+		background: rgba(5, 15, 28, 0.6);
+		border-color: rgba(62, 173, 213, 0.12);
+		transform: translateY(-2px);
 	}
 
 	.post-top {
@@ -60,31 +62,28 @@
 	}
 
 	.post-title {
-		font-family: var(--body);
-		font-size: 0.92rem;
+		font-size: 1rem;
 		font-weight: 500;
 		color: var(--text);
-		opacity: 0.8;
-		transition: color 0.2s, opacity 0.2s;
+		transition: color 0.2s;
 	}
 
 	.post-link:hover .post-title {
 		color: var(--accent);
-		opacity: 1;
 	}
 
 	.post-date {
 		font-family: var(--mono);
-		font-size: 0.62rem;
+		font-size: 0.75rem;
 		color: var(--text-dim);
 		flex-shrink: 0;
 	}
 
 	.post-desc {
-		font-size: 0.82rem;
+		font-size: 0.9rem;
 		font-weight: 300;
 		color: var(--text-dim);
-		line-height: 1.55;
+		line-height: 1.5;
 	}
 
 	@media (max-width: 480px) {

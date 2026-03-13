@@ -1,6 +1,7 @@
 <script lang="ts">
   import Presence from "$lib/components/Presence.svelte";
   import { onMount } from "svelte";
+  import { slide } from "svelte/transition";
   import { SiGithub, SiDiscord, SiInstagram } from "@icons-pack/svelte-simple-icons";
 
   let { data } = $props();
@@ -11,20 +12,31 @@
       description: "nixos configs for ~5 hosts + homelab",
       repo: "https://github.com/xhos/nix",
       lang: "nix",
+      details: "declarative configs for my desktop, laptop, server and a few other hosts. managed with flakes, home-manager for user env, and a bunch of custom modules.",
+      screenshots: [] as string[],
     },
     {
       name: "null",
       description: "way too complex of a finance tracker im making for my personal use",
       repo: "https://github.com/xhos/null-core",
       lang: "go",
+      details: "a personal finance tracker with transaction ingestion, category rules, and a tui. probably overkill but that's the point.",
+      screenshots: [] as string[],
     },
     {
       name: "yawn",
       description: "a minimalistic yet good-looking TUI greeter",
       repo: "https://github.com/xhos/yawn",
       lang: "go",
+      details: "a login greeter for wayland/tty that stays out of your way. just a username, password, and session picker.",
+      screenshots: [] as string[],
     },
   ];
+
+  let expandedProject = $state<string | null>(null);
+  function toggleProject(name: string) {
+    expandedProject = expandedProject === name ? null : name;
+  }
 
   const langColor: Record<string, string> = {
     nix: "#7ebae4",
@@ -149,14 +161,36 @@
     <div class="band-content">
       <ul class="card-list">
         {#each projects as project}
+          {@const open = expandedProject === project.name}
           <li>
-            <a href={project.repo} target="_blank" rel="noopener" class="card">
+            <div class="card" class:open role="button" tabindex="0"
+              onclick={() => toggleProject(project.name)}
+              onkeydown={(e) => e.key === 'Enter' && toggleProject(project.name)}>
               <div class="card-row">
                 <span class="card-title mono">{project.name}</span>
-                <span class="card-lang"><span class="lang-dot" style="background: {langColor[project.lang] ?? 'var(--accent)'}"></span>{project.lang}</span>
+                <div class="card-row-right">
+                  <span class="card-lang"><span class="lang-dot" style="background: {langColor[project.lang] ?? 'var(--accent)'}"></span>{project.lang}</span>
+                  <span class="chevron" class:rotated={open}>›</span>
+                </div>
               </div>
               <span class="card-desc">{project.description}</span>
-            </a>
+
+              {#if open}
+                <div class="card-expanded" transition:slide={{ duration: 220 }}>
+                  {#if project.screenshots.length > 0}
+                    <div class="screenshots">
+                      {#each project.screenshots as src}
+                        <img {src} alt="{project.name} screenshot" />
+                      {/each}
+                    </div>
+                  {/if}
+                  <p class="card-details">{project.details}</p>
+                  <a href={project.repo} target="_blank" rel="noopener" class="repo-link" onclick={(e) => e.stopPropagation()}>
+                    <SiGithub size={13} /> view on github
+                  </a>
+                </div>
+              {/if}
+            </div>
           </li>
         {/each}
       </ul>
@@ -281,8 +315,9 @@
   .band {
     position: relative;
     padding: 5rem var(--pad) 2rem;
+    z-index: 1;
   }
-  .band.overlap { margin-top: -4rem; }
+  .band.overlap { margin-top: -4rem; z-index: 0; }
 
   .band-content {
     position: relative; z-index: 1;
@@ -325,12 +360,16 @@
     border-radius: 10px;
     background: rgba(3, 10, 20, 0.45);
     border: 1px solid transparent;
-    transition: background 0.3s, border-color 0.3s;
+    transition: background 0.3s, border-color 0.3s, transform 0.2s;
   }
-  .card:hover {
+  .card:hover, .card.open {
     background: rgba(5, 15, 28, 0.6);
     border-color: rgba(62,173,213,0.12);
   }
+  .card:hover { transform: translateY(-2px); }
+  .card.open  { transform: none; cursor: default; }
+
+  .card { cursor: pointer; user-select: none; }
 
   .card-row {
     display: flex;
@@ -338,6 +377,66 @@
     align-items: baseline;
     gap: 1rem;
   }
+
+  .card-row-right {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-shrink: 0;
+  }
+
+  .chevron {
+    font-size: 1rem;
+    color: var(--text-dim);
+    line-height: 1;
+    display: inline-block;
+    transition: transform 0.2s;
+    transform: rotate(0deg);
+  }
+  .chevron.rotated { transform: rotate(90deg); }
+
+  .card-expanded {
+    margin-top: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    overflow: hidden;
+  }
+
+  .screenshots {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    border-radius: 6px;
+  }
+  .screenshots img {
+    height: 120px;
+    width: auto;
+    border-radius: 6px;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+
+  .card-details {
+    font-size: 0.88rem;
+    font-weight: 300;
+    color: var(--text-dim);
+    line-height: 1.6;
+    border-top: 1px solid rgba(62,173,213,0.08);
+    padding-top: 0.6rem;
+  }
+
+  .repo-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    transition: color 0.2s;
+    width: fit-content;
+  }
+  .repo-link:hover { color: var(--accent); }
 
   .card-title {
     font-size: 1rem; font-weight: 500; color: var(--text);
@@ -423,7 +522,7 @@
     .band { padding: 3rem 1.5rem 1.5rem; }
     .band.overlap { margin-top: 0; }
     .band-content { max-width: none; margin-left: 0 !important; margin-right: 0 !important; }
-    .ghost { position: relative; top: auto; left: auto; right: auto; margin-bottom: 0.5rem; }
+    .ghost { position: relative; top: auto; left: auto !important; right: auto !important; margin-bottom: 0.5rem; white-space: normal; font-size: clamp(2rem, 12vw, 3rem); }
     .uses-row { flex-direction: column; gap: 0.1rem; }
     .uses-row dt { min-width: 0; }
   }

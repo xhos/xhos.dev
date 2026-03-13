@@ -42,6 +42,30 @@ a:hover {
 	color: var(--accent);
 }
 
+/* ── scrollbar ── */
+::-webkit-scrollbar {
+	width: 6px;
+	height: 6px;
+}
+
+::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+	background: var(--border);
+	border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: var(--text-dim);
+}
+
+* {
+	scrollbar-width: thin;
+	scrollbar-color: var(--border) transparent;
+}
+
 ::selection {
 	background: rgba(62, 173, 213, 0.2);
 	color: #fff;

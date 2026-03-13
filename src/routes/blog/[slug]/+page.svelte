@@ -11,7 +11,7 @@
 </svelte:head>
 
 <div class="page-shell">
-	<div class="back"><a href="/blog">← blog</a></div>
+	<div class="back"><a href="/blog">← all posts</a></div>
 
 	<article>
 		<header>
