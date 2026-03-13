@@ -160,11 +160,11 @@
     display: flex;
     flex-direction: column;
     gap: 1.4rem;
-    transition: opacity 0.5s;
+    transition: opacity 0.8s ease;
   }
 
   .presence.loading {
-    opacity: 0.25;
+    opacity: 0;
   }
 
   /* ── discord bar ── */

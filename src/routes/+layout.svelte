@@ -1,6 +1,7 @@
 <script lang="ts">
 	import '../app.css';
 	import { page } from '$app/stores';
+	import Scrollbar from '$lib/components/Scrollbar.svelte';
 
 	let { children } = $props();
 </script>
@@ -12,6 +13,7 @@
 <div class="site" class:inner={$page.url.pathname !== '/'}>
 	{@render children()}
 </div>
+<Scrollbar />
 
 <style>
 	.inner {
