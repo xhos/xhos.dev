@@ -11,32 +11,31 @@
 
 	let { landPath, graticulePath, visited, VW, VH }: Props = $props();
 
-	// ── zoom / pan ──
+	// ── transform state ──
 	let zoom = $state(1);
 	let px = $state(0);
 	let py = $state(0);
 	let dragging = $state(false);
-	let origin = { x: 0, y: 0, px: 0, py: 0 };
+
+	function clamp(v: number, lo: number, hi: number) {
+		return Math.max(lo, Math.min(hi, v));
+	}
 
 	function bound(x: number, y: number, z: number) {
 		const bx = (VW * (z - 1)) / 2;
 		const by = (VH * (z - 1)) / 2;
-		return { x: Math.max(-bx, Math.min(bx, x)), y: Math.max(-by, Math.min(by, y)) };
+		return { x: clamp(x, -bx, bx), y: clamp(y, -by, by) };
 	}
 
-	function getSvgScale(el: EventTarget | null) {
-		return VW / (el as SVGSVGElement).getBoundingClientRect().width;
-	}
-
-	// mouse wheel zoom
-	function wheel(e: WheelEvent) {
+	// ── mouse wheel zoom ──
+	function onWheel(e: WheelEvent) {
 		e.preventDefault();
 		const r = (e.currentTarget as SVGSVGElement).getBoundingClientRect();
 		const s = VW / r.width;
 		const mx = (e.clientX - r.left) * s;
 		const my = (e.clientY - r.top) * s;
 		const f = e.deltaY < 0 ? 1.15 : 1 / 1.15;
-		const nz = Math.max(1, Math.min(12, zoom * f));
+		const nz = clamp(zoom * f, 1, 12);
 		const ratio = nz / zoom;
 		px = px * ratio + (mx - VW / 2) * (1 - ratio);
 		py = py * ratio + (my - VH / 2) * (1 - ratio);
@@ -44,59 +43,199 @@
 		({ x: px, y: py } = bound(px, py, zoom));
 	}
 
-	// pointer drag (mouse + single touch)
-	function down(e: PointerEvent) {
+	// ── mouse/trackpad drag (non-touch pointer only) ──
+	let mouseOrigin = { x: 0, y: 0, px: 0, py: 0 };
+
+	function onPointerDown(e: PointerEvent) {
+		if (e.pointerType === 'touch') return;
 		if (e.button !== 0) return;
 		dragging = true;
-		origin = { x: e.clientX, y: e.clientY, px, py };
+		mouseOrigin = { x: e.clientX, y: e.clientY, px, py };
 		(e.currentTarget as Element).setPointerCapture(e.pointerId);
 	}
 
-	function move(e: PointerEvent) {
+	function onPointerMove(e: PointerEvent) {
+		if (e.pointerType === 'touch') return;
 		if (!dragging) return;
-		const s = getSvgScale(e.currentTarget);
+		const s = VW / (e.currentTarget as SVGSVGElement).getBoundingClientRect().width;
 		({ x: px, y: py } = bound(
-			origin.px + (e.clientX - origin.x) * s,
-			origin.py + (e.clientY - origin.y) * s,
+			mouseOrigin.px + (e.clientX - mouseOrigin.x) * s,
+			mouseOrigin.py + (e.clientY - mouseOrigin.y) * s,
 			zoom,
 		));
 	}
 
-	function up() { dragging = false; }
+	function onPointerUp(e: PointerEvent) {
+		if (e.pointerType === 'touch') return;
+		dragging = false;
+	}
 
-	// pinch zoom (two-finger touch)
-	let pinch = { dist: 0, zoom: 1, cx: 0, cy: 0 };
+	// ── touch: pan + pinch + inertia + double-tap ──
+	let inertiaRaf = 0;
+	let vx = 0;
+	let vy = 0;
 
-	function touchStart(e: TouchEvent) {
-		if (e.touches.length === 2) {
-			e.preventDefault();
-			const [a, b] = [e.touches[0], e.touches[1]];
-			pinch = {
-				dist: Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY),
-				zoom,
-				cx: (a.clientX + b.clientX) / 2,
-				cy: (a.clientY + b.clientY) / 2,
-			};
+	function cancelInertia() {
+		if (inertiaRaf) { cancelAnimationFrame(inertiaRaf); inertiaRaf = 0; }
+	}
+
+	function startInertia() {
+		cancelInertia();
+		function tick() {
+			vx *= 0.94;
+			vy *= 0.94;
+			if (Math.abs(vx) < 0.05 && Math.abs(vy) < 0.05) return;
+			const b = bound(px + vx, py + vy, zoom);
+			px = b.x; py = b.y;
+			inertiaRaf = requestAnimationFrame(tick);
+		}
+		inertiaRaf = requestAnimationFrame(tick);
+	}
+
+	// track active touches by id → {x, y}
+	let activeTouches = new Map<number, { x: number; y: number }>();
+	let lastMidX = 0, lastMidY = 0;
+	let lastPinchDist = 0;
+	let lastMoveT = 0;
+	let lastDx = 0, lastDy = 0;
+
+	// double-tap state
+	let lastTapT = 0;
+	let lastTapX = 0, lastTapY = 0;
+
+	function touchMid() {
+		const pts = [...activeTouches.values()];
+		return { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 };
+	}
+
+	function touchDist() {
+		const pts = [...activeTouches.values()];
+		return Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+	}
+
+	function onTouchStart(e: TouchEvent) {
+		e.preventDefault();
+		cancelInertia();
+
+		for (const t of e.changedTouches) {
+			activeTouches.set(t.identifier, { x: t.clientX, y: t.clientY });
+		}
+
+		if (activeTouches.size === 1) {
+			const t = [...activeTouches.values()][0];
+			dragging = true;
+			lastMidX = t.x;
+			lastMidY = t.y;
+			lastMoveT = Date.now();
+			vx = 0; vy = 0;
+
+			// double-tap to zoom
+			const now = Date.now();
+			if (now - lastTapT < 280 && Math.hypot(t.x - lastTapX, t.y - lastTapY) < 40) {
+				lastTapT = 0;
+				const svg = e.currentTarget as SVGSVGElement;
+				const r = svg.getBoundingClientRect();
+				const s = VW / r.width;
+				const mx = (t.x - r.left) * s;
+				const my = (t.y - r.top) * s;
+				if (zoom > 1.5) {
+					// reset
+					px = 0; py = 0; zoom = 1;
+				} else {
+					const nz = clamp(zoom * 3, 1, 12);
+					const ratio = nz / zoom;
+					px = px * ratio + (mx - VW / 2) * (1 - ratio);
+					py = py * ratio + (my - VH / 2) * (1 - ratio);
+					zoom = nz;
+					({ x: px, y: py } = bound(px, py, zoom));
+				}
+				return;
+			}
+			lastTapT = now;
+			lastTapX = t.x;
+			lastTapY = t.y;
+		}
+
+		if (activeTouches.size === 2) {
+			dragging = true;
+			lastPinchDist = touchDist();
+			const mid = touchMid();
+			lastMidX = mid.x;
+			lastMidY = mid.y;
 		}
 	}
 
-	function touchMove(e: TouchEvent) {
-		if (e.touches.length !== 2) return;
+	function onTouchMove(e: TouchEvent) {
 		e.preventDefault();
-		const [a, b] = [e.touches[0], e.touches[1]];
-		const dist = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
-		const nz = Math.max(1, Math.min(12, pinch.zoom * (dist / pinch.dist)));
 
-		const svg = (e.currentTarget as SVGSVGElement);
+		for (const t of e.changedTouches) {
+			if (activeTouches.has(t.identifier)) {
+				activeTouches.set(t.identifier, { x: t.clientX, y: t.clientY });
+			}
+		}
+
+		const svg = e.currentTarget as SVGSVGElement;
 		const r = svg.getBoundingClientRect();
 		const s = VW / r.width;
-		const mx = (pinch.cx - r.left) * s;
-		const my = (pinch.cy - r.top) * s;
-		const ratio = nz / zoom;
-		px = px * ratio + (mx - VW / 2) * (1 - ratio);
-		py = py * ratio + (my - VH / 2) * (1 - ratio);
-		zoom = nz;
-		({ x: px, y: py } = bound(px, py, zoom));
+
+		if (activeTouches.size === 1) {
+			const t = [...activeTouches.values()][0];
+			const now = Date.now();
+			const dt = Math.max(1, now - lastMoveT);
+			const dx = (t.x - lastMidX) * s;
+			const dy = (t.y - lastMidY) * s;
+
+			// rolling velocity (SVG units per frame @ 60fps)
+			vx = dx / dt * 16;
+			vy = dy / dt * 16;
+			lastDx = dx; lastDy = dy;
+
+			({ x: px, y: py } = bound(px + dx, py + dy, zoom));
+			lastMidX = t.x;
+			lastMidY = t.y;
+			lastMoveT = now;
+		} else if (activeTouches.size === 2) {
+			const dist = touchDist();
+			const mid = touchMid();
+
+			// zoom around pinch midpoint
+			const nz = clamp(zoom * (dist / lastPinchDist), 1, 12);
+			const mx = (lastMidX - r.left) * s;
+			const my = (lastMidY - r.top) * s;
+			const ratio = nz / zoom;
+			px = px * ratio + (mx - VW / 2) * (1 - ratio);
+			py = py * ratio + (my - VH / 2) * (1 - ratio);
+			zoom = nz;
+
+			// pan from midpoint movement
+			px += (mid.x - lastMidX) * s;
+			py += (mid.y - lastMidY) * s;
+			({ x: px, y: py } = bound(px, py, zoom));
+
+			lastPinchDist = dist;
+			lastMidX = mid.x;
+			lastMidY = mid.y;
+		}
+	}
+
+	function onTouchEnd(e: TouchEvent) {
+		e.preventDefault();
+		for (const t of e.changedTouches) {
+			activeTouches.delete(t.identifier);
+		}
+
+		if (activeTouches.size === 0) {
+			dragging = false;
+			// launch inertia if there was meaningful velocity
+			if (Math.abs(vx) > 0.5 || Math.abs(vy) > 0.5) startInertia();
+		} else if (activeTouches.size === 1) {
+			// finger lifted during pinch — re-anchor single-touch pan
+			const t = [...activeTouches.values()][0];
+			lastMidX = t.x;
+			lastMidY = t.y;
+			lastMoveT = Date.now();
+			vx = 0; vy = 0;
+		}
 	}
 
 	// ── tooltip ──
@@ -111,15 +250,17 @@
 		class:dragging
 		role="img"
 		aria-label="Interactive world travel map"
-		onwheel={wheel}
-		onpointerdown={down}
-		onpointermove={move}
-		onpointerup={up}
-		onpointerleave={up}
-		ontouchstart={touchStart}
-		ontouchmove={touchMove}
+		onwheel={onWheel}
+		onpointerdown={onPointerDown}
+		onpointermove={onPointerMove}
+		onpointerup={onPointerUp}
+		onpointerleave={onPointerUp}
+		ontouchstart={onTouchStart}
+		ontouchmove={onTouchMove}
+		ontouchend={onTouchEnd}
+		ontouchcancel={onTouchEnd}
 	>
-		<g transform="translate({VW/2 + px},{VH/2 + py}) scale({zoom}) translate({-VW/2},{-VH/2})">
+		<g transform="translate({VW / 2 + px},{VH / 2 + py}) scale({zoom}) translate({-VW / 2},{-VH / 2})">
 			<path d={graticulePath} fill="none" stroke="rgba(62,173,213,0.03)" stroke-width="0.4" />
 			<path d={landPath} fill="#05101a" />
 
@@ -139,7 +280,6 @@
 		</g>
 	</svg>
 
-	<!-- HTML tooltip -->
 	{#if tip && !dragging}
 		<div class="tip" style="left:{tip.mx + 10}px;top:{tip.my + 10}px">
 			<span class="tip-name">{tip.name}</span>
@@ -166,6 +306,7 @@
 		cursor: grab;
 		touch-action: none;
 		user-select: none;
+		-webkit-user-select: none;
 	}
 	.map.dragging { cursor: grabbing; }
 
@@ -176,7 +317,6 @@
 	}
 	.visited:hover { opacity: 0.75; }
 
-	/* ── tooltip ── */
 	.tip {
 		position: fixed;
 		z-index: 20;
@@ -207,13 +347,5 @@
 		width: 6px;
 		height: 6px;
 		border-radius: 50%;
-	}
-
-	/* ── mobile ── */
-	@media (max-width: 600px) {
-		.legend { bottom: 0.75rem; left: 0.75rem; gap: 0.2rem; }
-		.legend-item { font-size: 0.5rem; }
-		.legend-dot { width: 5px; height: 5px; }
-		.meta { bottom: 0.75rem; right: 0.75rem; font-size: 0.5rem; }
 	}
 </style>
