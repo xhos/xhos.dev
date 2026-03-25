@@ -120,9 +120,8 @@
             class:scrolling={isScrolling}
             bind:this={activityEl}
           >
-            <svg class="note" viewBox="0 0 16 16" fill="currentColor"
-              ><path
-                d="M6 13c0 1.105-1.12 2-2.5 2S1 14.105 1 13s1.12-2 2.5-2 2.5.895 2.5 2zm9-2c0 1.105-1.12 2-2.5 2s-2.5-.895-2.5-2 1.12-2 2.5-2 2.5.895 2.5 2zM15 1v9h-2V3H8v7H6V1h9z"
+            <svg class="note" aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+              ><path fill="#45a366" d="M8.65 1.51A2 2 0 0 0 6 3.41v9.88A3.98 3.98 0 0 0 4.5 13C2.57 13 1 14.34 1 16s1.57 3 3.5 3S8 17.66 8 16V5.4l11 3.81v7.08a3.98 3.98 0 0 0-1.5-.29c-1.93 0-3.5 1.34-3.5 3s1.57 3 3.5 3 3.5-1.34 3.5-3V7.03c0-.74-.47-1.4-1.18-1.65L8.65 1.51Z"
               /></svg
             >
             <span class="scroll-track">
@@ -290,7 +289,6 @@
   .note {
     width: 0.75rem;
     height: 0.75rem;
-    color: #3ba55c;
     flex-shrink: 0;
     margin-right: 0.25rem;
   }
