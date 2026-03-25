@@ -11,6 +11,8 @@
 
 	let { landPath, graticulePath, visited, VW, VH }: Props = $props();
 
+	let svgEl: SVGSVGElement | null = null;
+
 	// ── transform state ──
 	let zoom = $state(1);
 	let px = $state(0);
@@ -21,19 +23,75 @@
 		return Math.max(lo, Math.min(hi, v));
 	}
 
+	/**
+	 * With `preserveAspectRatio="xMidYMid slice"`, the display scale is
+	 *   dispScale = max(elW/VW, elH/VH)
+	 * so 1 CSS pixel = 1/dispScale SVG units.
+	 * We return s = 1/dispScale = min(VW/elW, VH/elH).
+	 */
+	function svgScale(r: DOMRect) {
+		return Math.min(VW / r.width, VH / r.height);
+	}
+
+	/**
+	 * Convert absolute client coords → SVG coords, accounting for the
+	 * `xMidYMid slice` centering offset.
+	 */
+	function clientToSvg(cx: number, cy: number, r: DOMRect) {
+		const s = svgScale(r);
+		// slice centers the viewBox, so the visible SVG origin is offset
+		const ox = (VW - r.width * s) / 2;
+		const oy = (VH - r.height * s) / 2;
+		return { x: ox + (cx - r.left) * s, y: oy + (cy - r.top) * s };
+	}
+
+	/**
+	 * Panning bounds that account for the overflow `slice` creates at zoom=1.
+	 * On mobile portrait the map is cropped horizontally — allow panning to
+	 * uncover those hidden parts.
+	 */
 	function bound(x: number, y: number, z: number) {
-		const bx = (VW * (z - 1)) / 2;
-		const by = (VH * (z - 1)) / 2;
+		let bx = (VW * (z - 1)) / 2;
+		let by = (VH * (z - 1)) / 2;
+		if (svgEl) {
+			const r = svgEl.getBoundingClientRect();
+			const s = svgScale(r);
+			bx += Math.max(0, (VW - r.width * s) / 2);
+			by += Math.max(0, (VH - r.height * s) / 2);
+		}
 		return { x: clamp(x, -bx, bx), y: clamp(y, -by, by) };
+	}
+
+	// ── animated transitions (double-tap zoom) ──
+	let animRaf = 0;
+
+	function animateTo(tz: number, tpx: number, tpy: number) {
+		if (animRaf) cancelAnimationFrame(animRaf);
+		const t0 = performance.now();
+		const z0 = zoom, p0x = px, p0y = py;
+		const dur = 320;
+
+		function tick(now: number) {
+			const t = Math.min(1, (now - t0) / dur);
+			const e = 1 - Math.pow(1 - t, 3); // ease-out cubic
+			zoom = z0 + (tz - z0) * e;
+			px = p0x + (tpx - p0x) * e;
+			py = p0y + (tpy - p0y) * e;
+			if (t < 1) {
+				animRaf = requestAnimationFrame(tick);
+			} else {
+				animRaf = 0;
+			}
+		}
+		animRaf = requestAnimationFrame(tick);
 	}
 
 	// ── mouse wheel zoom ──
 	function onWheel(e: WheelEvent) {
 		e.preventDefault();
+		if (animRaf) { cancelAnimationFrame(animRaf); animRaf = 0; }
 		const r = (e.currentTarget as SVGSVGElement).getBoundingClientRect();
-		const s = VW / r.width;
-		const mx = (e.clientX - r.left) * s;
-		const my = (e.clientY - r.top) * s;
+		const { x: mx, y: my } = clientToSvg(e.clientX, e.clientY, r);
 		const f = e.deltaY < 0 ? 1.15 : 1 / 1.15;
 		const nz = clamp(zoom * f, 1, 12);
 		const ratio = nz / zoom;
@@ -43,21 +101,21 @@
 		({ x: px, y: py } = bound(px, py, zoom));
 	}
 
-	// ── mouse/trackpad drag (non-touch pointer only) ──
+	// ── mouse / trackpad drag (skip for touch) ──
 	let mouseOrigin = { x: 0, y: 0, px: 0, py: 0 };
 
 	function onPointerDown(e: PointerEvent) {
 		if (e.pointerType === 'touch') return;
 		if (e.button !== 0) return;
+		if (animRaf) { cancelAnimationFrame(animRaf); animRaf = 0; }
 		dragging = true;
 		mouseOrigin = { x: e.clientX, y: e.clientY, px, py };
 		(e.currentTarget as Element).setPointerCapture(e.pointerId);
 	}
 
 	function onPointerMove(e: PointerEvent) {
-		if (e.pointerType === 'touch') return;
-		if (!dragging) return;
-		const s = VW / (e.currentTarget as SVGSVGElement).getBoundingClientRect().width;
+		if (e.pointerType === 'touch' || !dragging) return;
+		const s = svgScale((e.currentTarget as SVGSVGElement).getBoundingClientRect());
 		({ x: px, y: py } = bound(
 			mouseOrigin.px + (e.clientX - mouseOrigin.x) * s,
 			mouseOrigin.py + (e.clientY - mouseOrigin.y) * s,
@@ -72,8 +130,7 @@
 
 	// ── touch: pan + pinch + inertia + double-tap ──
 	let inertiaRaf = 0;
-	let vx = 0;
-	let vy = 0;
+	let vx = 0, vy = 0;
 
 	function cancelInertia() {
 		if (inertiaRaf) { cancelAnimationFrame(inertiaRaf); inertiaRaf = 0; }
@@ -84,7 +141,7 @@
 		function tick() {
 			vx *= 0.94;
 			vy *= 0.94;
-			if (Math.abs(vx) < 0.05 && Math.abs(vy) < 0.05) return;
+			if (Math.abs(vx) < 0.08 && Math.abs(vy) < 0.08) return;
 			const b = bound(px + vx, py + vy, zoom);
 			px = b.x; py = b.y;
 			inertiaRaf = requestAnimationFrame(tick);
@@ -92,30 +149,30 @@
 		inertiaRaf = requestAnimationFrame(tick);
 	}
 
-	// track active touches by id → {x, y}
+	// map of touch id → client coords
 	let activeTouches = new Map<number, { x: number; y: number }>();
 	let lastMidX = 0, lastMidY = 0;
 	let lastPinchDist = 0;
 	let lastMoveT = 0;
-	let lastDx = 0, lastDy = 0;
 
-	// double-tap state
+	// double-tap detection
 	let lastTapT = 0;
 	let lastTapX = 0, lastTapY = 0;
 
 	function touchMid() {
-		const pts = [...activeTouches.values()];
-		return { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 };
+		const [a, b] = [...activeTouches.values()];
+		return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
 	}
 
 	function touchDist() {
-		const pts = [...activeTouches.values()];
-		return Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+		const [a, b] = [...activeTouches.values()];
+		return Math.hypot(a.x - b.x, a.y - b.y);
 	}
 
 	function onTouchStart(e: TouchEvent) {
 		e.preventDefault();
 		cancelInertia();
+		if (animRaf) { cancelAnimationFrame(animRaf); animRaf = 0; }
 
 		for (const t of e.changedTouches) {
 			activeTouches.set(t.identifier, { x: t.clientX, y: t.clientY });
@@ -129,25 +186,22 @@
 			lastMoveT = Date.now();
 			vx = 0; vy = 0;
 
-			// double-tap to zoom
+			// double-tap
 			const now = Date.now();
 			if (now - lastTapT < 280 && Math.hypot(t.x - lastTapX, t.y - lastTapY) < 40) {
 				lastTapT = 0;
 				const svg = e.currentTarget as SVGSVGElement;
 				const r = svg.getBoundingClientRect();
-				const s = VW / r.width;
-				const mx = (t.x - r.left) * s;
-				const my = (t.y - r.top) * s;
+				const { x: mx, y: my } = clientToSvg(t.x, t.y, r);
 				if (zoom > 1.5) {
-					// reset
-					px = 0; py = 0; zoom = 1;
+					animateTo(1, 0, 0);
 				} else {
 					const nz = clamp(zoom * 3, 1, 12);
 					const ratio = nz / zoom;
-					px = px * ratio + (mx - VW / 2) * (1 - ratio);
-					py = py * ratio + (my - VH / 2) * (1 - ratio);
-					zoom = nz;
-					({ x: px, y: py } = bound(px, py, zoom));
+					const tpx = px * ratio + (mx - VW / 2) * (1 - ratio);
+					const tpy = py * ratio + (my - VH / 2) * (1 - ratio);
+					const { x: bpx, y: bpy } = bound(tpx, tpy, nz);
+					animateTo(nz, bpx, bpy);
 				}
 				return;
 			}
@@ -162,6 +216,7 @@
 			const mid = touchMid();
 			lastMidX = mid.x;
 			lastMidY = mid.y;
+			vx = 0; vy = 0;
 		}
 	}
 
@@ -176,7 +231,7 @@
 
 		const svg = e.currentTarget as SVGSVGElement;
 		const r = svg.getBoundingClientRect();
-		const s = VW / r.width;
+		const s = svgScale(r);
 
 		if (activeTouches.size === 1) {
 			const t = [...activeTouches.values()][0];
@@ -185,10 +240,9 @@
 			const dx = (t.x - lastMidX) * s;
 			const dy = (t.y - lastMidY) * s;
 
-			// rolling velocity (SVG units per frame @ 60fps)
-			vx = dx / dt * 16;
-			vy = dy / dt * 16;
-			lastDx = dx; lastDy = dy;
+			// velocity in SVG units per frame (~60fps)
+			vx = (dx / dt) * 16;
+			vy = (dy / dt) * 16;
 
 			({ x: px, y: py } = bound(px + dx, py + dy, zoom));
 			lastMidX = t.x;
@@ -198,16 +252,15 @@
 			const dist = touchDist();
 			const mid = touchMid();
 
-			// zoom around pinch midpoint
+			// zoom around initial pinch center
 			const nz = clamp(zoom * (dist / lastPinchDist), 1, 12);
-			const mx = (lastMidX - r.left) * s;
-			const my = (lastMidY - r.top) * s;
+			const { x: mx, y: my } = clientToSvg(lastMidX, lastMidY, r);
 			const ratio = nz / zoom;
 			px = px * ratio + (mx - VW / 2) * (1 - ratio);
 			py = py * ratio + (my - VH / 2) * (1 - ratio);
 			zoom = nz;
 
-			// pan from midpoint movement
+			// pan from midpoint movement (simultaneous with zoom)
 			px += (mid.x - lastMidX) * s;
 			py += (mid.y - lastMidY) * s;
 			({ x: px, y: py } = bound(px, py, zoom));
@@ -226,10 +279,9 @@
 
 		if (activeTouches.size === 0) {
 			dragging = false;
-			// launch inertia if there was meaningful velocity
 			if (Math.abs(vx) > 0.5 || Math.abs(vy) > 0.5) startInertia();
 		} else if (activeTouches.size === 1) {
-			// finger lifted during pinch — re-anchor single-touch pan
+			// one finger lifted mid-pinch — re-anchor for single-touch pan
 			const t = [...activeTouches.values()][0];
 			lastMidX = t.x;
 			lastMidY = t.y;
@@ -244,6 +296,7 @@
 
 <div class="map-wrap">
 	<svg
+		bind:this={svgEl}
 		viewBox="0 0 {VW} {VH}"
 		preserveAspectRatio="xMidYMid slice"
 		class="map"
