@@ -20,7 +20,6 @@
         src = ./.;
         hooks = {
           alejandra.enable = true;
-          biome.enable = true;
         };
       };
     });
@@ -28,10 +27,9 @@
     devShells = forAllSystems (pkgs: {
       default = pkgs.mkShell {
         packages = with pkgs; [
-          bun
-
+          python3
           (writeShellScriptBin "run" ''
-            bun run dev
+            python3 -m http.server -d www
           '')
         ];
         shellHook = "${self.checks.${pkgs.system}.pre-commit.shellHook}";
