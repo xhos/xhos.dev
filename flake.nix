@@ -24,6 +24,25 @@
       };
     });
 
+    packages = forAllSystems (pkgs: {
+      image = pkgs.dockerTools.buildLayeredImage {
+        name = "git.xhos.dev/xhos/xhos.dev";
+        tag = self.shortRev or "dirty";
+        config = {
+          Cmd = [
+            "${pkgs.static-web-server}/bin/static-web-server"
+            "--port"
+            "8080"
+            "--root"
+            "${./www}"
+            "--page404"
+            "${./www}/404.html"
+          ];
+          ExposedPorts."8080/tcp" = {};
+        };
+      };
+    });
+
     devShells = forAllSystems (pkgs: {
       default = pkgs.mkShell {
         packages = with pkgs; [
