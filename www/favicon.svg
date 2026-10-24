@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" shape-rendering="crispEdges">
+  <style>
+    .g { fill: #3b6e2a; }
+    @media (prefers-color-scheme: dark) {
+      .g { fill: #9dbd85; }
+    }
+  </style>
+  <g class="g">
+    <!-- center blade, tallest, leaning right -->
+    <rect x="7" y="12" width="1" height="4"/>
+    <rect x="8" y="8" width="1" height="4"/>
+    <rect x="9" y="5" width="1" height="3"/>
+    <rect x="10" y="3" width="1" height="2"/>
+    <!-- left blade, curving left -->
+    <rect x="6" y="14" width="1" height="2"/>
+    <rect x="5" y="12" width="1" height="2"/>
+    <rect x="4" y="10" width="1" height="2"/>
+    <rect x="3" y="8" width="1" height="2"/>
+    <rect x="2" y="7" width="1" height="1"/>
+    <!-- right blade, short, leaning hard -->
+    <rect x="8" y="15" width="1" height="1"/>
+    <rect x="9" y="13" width="1" height="2"/>
+    <rect x="10" y="12" width="1" height="1"/>
+    <rect x="11" y="10" width="1" height="2"/>
+    <rect x="12" y="9" width="1" height="1"/>
+    <rect x="13" y="8" width="1" height="1"/>
+    <!-- small left stub -->
+    <rect x="4" y="15" width="1" height="1"/>
+    <rect x="3" y="14" width="1" height="1"/>
+    <rect x="2" y="13" width="1" height="1"/>
+  </g>
+</svg>
