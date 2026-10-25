@@ -1,0 +1,19 @@
+on:
+  push:
+
+jobs:
+  image:
+    runs-on: nix
+    steps:
+      - uses: actions/checkout@v4
+
+      - run: nix build .#image
+
+      # tag: <branch>-<commit time>-<sha>
+      - name: push
+        run: |
+          tag="${GITHUB_REF_NAME//\//-}-$(nix eval --raw .#packages.x86_64-linux.image.imageTag)"
+          nix run --inputs-from . nixpkgs#skopeo -- copy \
+            --dest-creds "xhos:${{ secrets.REGISTRY_TOKEN }}" \
+            docker-archive:result "docker://git.xhos.dev/xhos/xhos.dev:$tag"
+          echo "pushed $tag"

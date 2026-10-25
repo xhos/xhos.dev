@@ -27,7 +27,7 @@
     packages = forAllSystems (pkgs: {
       image = pkgs.dockerTools.buildLayeredImage {
         name = "git.xhos.dev/xhos/xhos.dev";
-        tag = self.shortRev or "dirty";
+        tag = "${self.lastModifiedDate}-${self.shortRev or "dirty"}";
         config = {
           Cmd = [
             "${pkgs.static-web-server}/bin/static-web-server"
